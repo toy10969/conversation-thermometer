@@ -5,564 +5,486 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>会話の温度計</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg: #0a0a18;
-    --card: #111128;
-    --surface: #191932;
-    --border: #2a2a4a;
-    --text: #e8e8f8;
-    --text-muted: #8888aa;
-    --accent: #6666ff;
-    --accent-hover: #7777ff;
-  }
+:root {
+  --bg: #f4f2ff;
+  --card: #ffffff;
+  --surface: #f9f7ff;
+  --border: #e4dfff;
+  --text: #2a2640;
+  --text-muted: #7a75a0;
+  --accent: #7c6fff;
+  --accent-light: #edeaff;
+  --accent-hover: #6a5eee;
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --warning-light: #fef3c7;
+  --danger-light: #fee2e2;
+  --shadow: 0 2px 14px rgba(124,111,255,0.09);
+  --shadow-md: 0 6px 24px rgba(124,111,255,0.15);
+  --radius: 14px;
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic', sans-serif;
-    min-height: 100vh;
-    padding: 24px 16px;
-  }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic UI','Segoe UI',sans-serif;
+  min-height: 100vh;
+  line-height: 1.65;
+  font-size: 15px;
+}
 
-  h1 {
-    text-align: center;
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 4px;
-    background: linear-gradient(135deg, #88aaff, #ff88cc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+/* ── Header ── */
+.app-header {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 6px rgba(124,111,255,0.07);
+  position: sticky; top: 0; z-index: 100;
+}
+.app-logo { font-size: 1.7rem; }
+.app-title { font-size: 1.15rem; font-weight: 800; color: var(--accent); }
+.app-subtitle { font-size: 0.73rem; color: var(--text-muted); margin-top: 1px; }
 
-  .subtitle {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-bottom: 28px;
-  }
+/* ── Layout ── */
+.layout { display: flex; min-height: calc(100vh - 60px); }
 
-  .container {
-    max-width: 960px;
-    margin: 0 auto;
-  }
+/* ── Sidebar ── */
+.sidebar {
+  width: 240px; flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid var(--border);
+  padding: 20px 14px;
+  overflow-y: auto;
+}
+@media (max-width: 720px) { .sidebar { display: none; } .layout { display: block; } }
 
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 20px;
-  }
+.sidebar-title {
+  font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.09em; color: var(--text-muted);
+  padding: 0 4px; margin-bottom: 10px;
+}
+.partner-list { display: flex; flex-direction: column; gap: 3px; margin-bottom: 12px; }
 
-  .card h2 {
-    font-size: 1rem;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-  }
+.partner-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 10px; border-radius: 10px; cursor: pointer;
+  transition: background 0.13s; border: 1.5px solid transparent;
+}
+.partner-item:hover { background: var(--surface); }
+.partner-item.active { background: var(--accent-light); border-color: var(--accent); }
 
-  textarea {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-    color: var(--text);
-    font-size: 0.9rem;
-    outline: none;
-    resize: vertical;
-    min-height: 160px;
-    font-family: inherit;
-    line-height: 1.6;
-    transition: border-color 0.2s;
-  }
+.partner-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: 800; flex-shrink: 0;
+}
+.partner-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.partner-rel-label { font-size: 0.7rem; color: var(--text-muted); }
 
-  textarea:focus { border-color: var(--accent); }
-  textarea::placeholder { color: var(--text-muted); }
+.btn-add-partner {
+  width: 100%; padding: 9px; border: 2px dashed var(--border);
+  border-radius: 10px; background: none; color: var(--text-muted);
+  font-size: 0.83rem; cursor: pointer; transition: all 0.15s;
+}
+.btn-add-partner:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
 
-  .btn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 11px 22px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    white-space: nowrap;
-  }
+/* ── Main ── */
+.main-content { flex: 1; padding: 22px; max-width: 780px; margin: 0 auto; width: 100%; }
+@media (max-width: 600px) { .main-content { padding: 14px; } }
 
-  .btn:hover { background: var(--accent-hover); }
-  .btn:active { transform: scale(0.97); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+/* ── Mobile partner bar ── */
+.mobile-bar {
+  display: none; gap: 7px; overflow-x: auto;
+  padding-bottom: 10px; margin-bottom: 14px; scrollbar-width: none;
+}
+.mobile-bar::-webkit-scrollbar { display: none; }
+@media (max-width: 720px) { .mobile-bar { display: flex; } }
 
-  .btn-secondary {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    padding: 8px 14px;
-  }
+.m-chip {
+  flex-shrink: 0; padding: 6px 13px; border-radius: 20px;
+  border: 1.5px solid var(--border); background: #fff;
+  font-size: 0.81rem; cursor: pointer; white-space: nowrap; transition: all 0.13s;
+}
+.m-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+.m-chip.add { border-style: dashed; color: var(--text-muted); }
 
-  .btn-secondary:hover { color: var(--text); border-color: var(--accent); background: var(--surface); }
+/* ── Card ── */
+.card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  margin-bottom: 14px; box-shadow: var(--shadow);
+}
+.card-label {
+  font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 12px;
+}
 
-  .textarea-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 10px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
+/* ── Partner banner ── */
+.partner-banner {
+  display: none; align-items: center; gap: 14px;
+  padding: 14px 18px; background: #fff;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  margin-bottom: 14px; box-shadow: var(--shadow);
+}
+.partner-banner.visible { display: flex; }
+.banner-avatar { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; flex-shrink: 0; }
+.banner-name { font-size: 1rem; font-weight: 700; }
+.banner-rel { font-size: 0.78rem; color: var(--text-muted); }
+.personalized-badge {
+  display: none;
+  background: linear-gradient(135deg,#7c6fff,#c084fc);
+  color: #fff; font-size: 0.68rem; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+}
+.personalized-badge.visible { display: inline-block; }
+.btn-edit { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 5px 11px; font-size: 0.78rem; color: var(--text-muted); cursor: pointer; transition: all 0.13s; flex-shrink: 0; }
+.btn-edit:hover { border-color: var(--accent); color: var(--accent); }
 
-  .char-count {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-  }
+/* ── Tabs ── */
+.input-tabs { display: flex; background: var(--surface); border-radius: 10px; padding: 4px; margin-bottom: 14px; }
+.tab-btn { flex: 1; background: none; border: none; border-radius: 7px; padding: 8px 14px; font-size: 0.86rem; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all 0.15s; }
+.tab-btn.active { background: #fff; color: var(--accent); box-shadow: 0 1px 5px rgba(0,0,0,0.08); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
 
-  .action-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
+/* ── Textarea ── */
+textarea {
+  width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 11px; padding: 13px; color: var(--text); font-size: 0.88rem;
+  outline: none; resize: vertical; min-height: 150px; font-family: inherit;
+  line-height: 1.65; transition: border-color 0.2s;
+}
+textarea:focus { border-color: var(--accent); }
+textarea::placeholder { color: #bbb8d0; }
 
-  .hint { font-size: 0.75rem; color: var(--text-muted); }
+/* ── Buttons ── */
+.btn {
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 10px; padding: 10px 20px; font-size: 0.88rem;
+  font-weight: 700; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(124,111,255,0.35); }
+.btn:active { transform: none; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-secondary { background: #fff; border: 1.5px solid var(--border); color: var(--text-muted); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); transform: none; box-shadow: none; }
+.btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
+.btn-green { background: var(--success); }
+.btn-green:hover { background: #059669; }
 
-  /* Results layout */
-  .results {
-    display: none;
-    grid-template-columns: 220px 1fr;
-    gap: 20px;
-  }
+.tf-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 9px; flex-wrap: wrap; gap: 8px; }
+.char-count { font-size: 0.76rem; color: var(--text-muted); }
+.action-row { display: flex; gap: 8px; align-items: center; }
+.hint { font-size: 0.73rem; color: #bbb8d0; }
 
-  .results.visible { display: grid; }
+/* ── Upload zone ── */
+.upload-zone {
+  border: 2px dashed var(--border); border-radius: 12px;
+  padding: 38px 20px; text-align: center; cursor: pointer; transition: all 0.2s;
+}
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--accent-light); }
+.upload-zone-icon { font-size: 2.4rem; margin-bottom: 8px; }
+.upload-zone p { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 3px; }
+.upload-hint { font-size: 0.73rem; color: #bbb8d0; }
+#fileInput { display: none; }
 
-  @media (max-width: 640px) {
-    .results.visible { grid-template-columns: 1fr; }
-  }
+.image-preview { display: none; align-items: flex-start; gap: 12px; padding: 12px; background: var(--surface); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 10px; }
+.image-preview.visible { display: flex; }
+.preview-thumb { width: 68px; height: 68px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+.preview-info { flex: 1; min-width: 0; }
+.preview-name { font-size: 0.86rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+.preview-size { font-size: 0.76rem; color: var(--text-muted); margin-bottom: 7px; }
+.preview-remove { background: var(--danger-light); border: 1px solid #fca5a5; color: #dc2626; border-radius: 6px; padding: 3px 9px; font-size: 0.76rem; cursor: pointer; }
 
-  /* Thermometer */
-  .thermometer-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-  }
+/* ── Loading / Error ── */
+.loading { display: none; text-align: center; padding: 44px 20px; color: var(--text-muted); }
+.loading.visible { display: block; }
+.spinner { display: inline-block; width: 38px; height: 38px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-box { display: none; background: var(--danger-light); border: 1px solid #fca5a5; border-radius: 11px; padding: 13px 16px; color: #dc2626; font-size: 0.88rem; margin-bottom: 14px; }
+.error-box.visible { display: block; }
 
-  .temp-display {
-    font-size: 3rem;
-    font-weight: 800;
-    line-height: 1;
-  }
+/* ── Results ── */
+.results { display: none; }
+.results.visible { display: block; }
 
-  .mood-label {
-    font-size: 1.1rem;
-    color: var(--text-muted);
-    font-weight: 600;
-  }
+/* Thermometer layout */
+.thermo-grid { display: grid; grid-template-columns: 148px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 500px) { .thermo-grid { grid-template-columns: 1fr; } }
 
-  .zone-label {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    text-align: center;
-  }
+.thermo-card {
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: var(--shadow);
+}
+.temp-display { font-size: 2.7rem; font-weight: 900; line-height: 1; }
+.mood-label { font-size: 0.98rem; color: var(--text-muted); font-weight: 600; }
+.zone-label { font-size: 0.75rem; color: var(--text-muted); text-align: center; }
 
-  /* Right column */
-  .right-col { display: flex; flex-direction: column; gap: 16px; }
+/* Emotion bars */
+.emotion-bars { display: flex; flex-direction: column; gap: 9px; }
+.emotion-row { display: flex; align-items: center; gap: 9px; }
+.emotion-name { width: 88px; font-size: 0.81rem; color: var(--text-muted); flex-shrink: 0; }
+.bar-bg { flex: 1; height: 8px; background: var(--surface); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 0.85s cubic-bezier(0.33,1,0.68,1); }
+.bar-val { font-size: 0.72rem; color: var(--text-muted); width: 26px; text-align: right; flex-shrink: 0; }
 
-  .summary-text {
-    font-size: 0.95rem;
-    line-height: 1.7;
-    color: var(--text);
-  }
+/* Points */
+.points-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 440px) { .points-grid { grid-template-columns: 1fr; } }
+.points-section h3 { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 7px; font-weight: 800; }
+.points-section.positive h3 { color: #059669; }
+.points-section.concern h3 { color: #d97706; }
+.point-item { font-size: 0.83rem; line-height: 1.5; padding: 5px 9px; border-radius: 7px; margin-bottom: 5px; }
+.positive .point-item { background: var(--success-light); color: #065f46; }
+.concern .point-item { background: var(--warning-light); color: #92400e; }
 
-  .advice-text {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: #aaffcc;
-    background: rgba(100, 255, 150, 0.05);
-    border-left: 3px solid #44cc77;
-    padding: 12px 14px;
-    border-radius: 0 8px 8px 0;
-  }
+.summary-text { font-size: 0.9rem; line-height: 1.78; color: var(--text); }
+.advice-text { font-size: 0.86rem; line-height: 1.67; color: #065f46; background: var(--success-light); border-left: 3px solid var(--success); padding: 11px 13px; border-radius: 0 9px 9px 0; }
 
-  /* Emotion bars */
-  .emotion-bars { display: flex; flex-direction: column; gap: 10px; }
+/* Reply suggestions */
+.reply-list { display: flex; flex-direction: column; gap: 9px; }
+.reply-item {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 11px; padding: 11px 13px; font-size: 0.86rem;
+  line-height: 1.62; cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: flex-start; gap: 9px;
+}
+.reply-item:hover { border-color: var(--accent); background: var(--accent-light); }
+.reply-num {
+  background: var(--accent); color: #fff; font-size: 0.68rem; font-weight: 800;
+  width: 19px; height: 19px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; margin-top: 2px;
+}
+.reply-text { flex: 1; }
 
-  .emotion-row { display: flex; align-items: center; gap: 10px; }
+/* Extracted text */
+.extracted-text { font-size: 0.8rem; line-height: 1.75; color: var(--text-muted); background: var(--surface); border-radius: 8px; padding: 11px 13px; max-height: 190px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; font-family: inherit; }
 
-  .emotion-name {
-    width: 90px;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
+/* Feedback */
+.fb-options { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 10px; }
+.fb-btn { padding: 7px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: #fff; font-size: 0.81rem; cursor: pointer; transition: all 0.15s; font-weight: 500; }
+.fb-btn:hover { border-color: var(--accent); color: var(--accent); }
+.fb-btn.sel-accurate { background: var(--success-light); border-color: var(--success); color: #065f46; }
+.fb-btn.sel-slightly  { background: var(--warning-light); border-color: #f59e0b; color: #92400e; }
+.fb-btn.sel-wrong     { background: var(--danger-light);  border-color: #ef4444; color: #dc2626; }
+.fb-note-area { display: none; }
+.fb-note-area.visible { display: block; }
+.fb-note { width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: 9px; padding: 9px 12px; color: var(--text); font-size: 0.86rem; font-family: inherit; resize: vertical; min-height: 72px; margin-bottom: 9px; outline: none; }
+.fb-note:focus { border-color: var(--accent); }
+.fb-thanks { display: none; font-size: 0.84rem; color: var(--success); font-weight: 600; margin-top: 4px; }
+.fb-thanks.visible { display: block; }
 
-  .bar-bg {
-    flex: 1;
-    height: 10px;
-    background: var(--surface);
-    border-radius: 5px;
-    overflow: hidden;
-  }
+/* History */
+.history-section { display: none; }
+.history-section.visible { display: block; }
+.chart-wrap { position: relative; height: 175px; margin-bottom: 14px; }
+.history-list { display: flex; flex-direction: column; gap: 7px; max-height: 300px; overflow-y: auto; }
+.history-item { display: flex; align-items: center; gap: 11px; padding: 11px 13px; background: var(--surface); border-radius: 10px; border: 1px solid var(--border); transition: background 0.13s; }
+.history-item:hover { background: var(--accent-light); }
+.history-temp { font-size: 1.25rem; font-weight: 900; width: 52px; flex-shrink: 0; }
+.history-meta { flex: 1; min-width: 0; }
+.history-mood { font-size: 0.86rem; font-weight: 600; }
+.history-date { font-size: 0.73rem; color: var(--text-muted); }
+.history-fb { font-size: 0.71rem; color: var(--text-muted); margin-top: 1px; }
 
-  .bar-fill {
-    height: 100%;
-    border-radius: 5px;
-    width: 0%;
-    transition: width 0.8s cubic-bezier(0.33, 1, 0.68, 1);
-  }
+/* Score card */
+.score-card {
+  background: linear-gradient(135deg,#7c6fff 0%,#c084fc 100%);
+  border-radius: 18px; padding: 22px; color: #fff;
+  position: relative; overflow: hidden;
+}
+.score-card::before { content:''; position:absolute; top:-35px; right:-35px; width:140px; height:140px; background:rgba(255,255,255,0.09); border-radius:50%; }
+.score-card::after  { content:''; position:absolute; bottom:-55px; left:-25px; width:180px; height:180px; background:rgba(255,255,255,0.05); border-radius:50%; }
+.sc-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; position:relative; z-index:1; }
+.sc-title { font-size:0.82rem; font-weight:600; opacity:0.85; margin-bottom:3px; }
+.sc-name  { font-size:1.15rem; font-weight:800; }
+.sc-score { font-size:3.2rem; font-weight:900; line-height:1; }
+.sc-grade { font-size:0.86rem; opacity:0.85; margin-top:3px; }
+.sc-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; position:relative; z-index:1; margin-bottom:13px; }
+.sc-stat { background:rgba(255,255,255,0.15); border-radius:9px; padding:9px; text-align:center; }
+.sc-stat-val { font-size:1.2rem; font-weight:800; }
+.sc-stat-label { font-size:0.67rem; opacity:0.8; margin-top:1px; }
+.sc-trend { background:rgba(255,255,255,0.12); border-radius:9px; padding:9px 13px; font-size:0.81rem; position:relative; z-index:1; margin-bottom:13px; }
+.btn-save-img { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:#fff; border-radius:8px; padding:7px 14px; font-size:0.8rem; font-weight:700; cursor:pointer; transition:background 0.15s; position:relative; z-index:1; }
+.btn-save-img:hover { background:rgba(255,255,255,0.32); }
 
-  .bar-val {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    width: 30px;
-    text-align: right;
-    flex-shrink: 0;
-  }
+/* Modal */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.38); z-index:500; align-items:center; justify-content:center; padding:16px; }
+.modal-overlay.open { display:flex; }
+.modal { background:#fff; border-radius:18px; padding:26px; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,0.18); max-height:88vh; overflow-y:auto; }
+.modal-title { font-size:1.1rem; font-weight:800; margin-bottom:18px; }
+.form-group { margin-bottom:14px; }
+.form-label { font-size:0.79rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:5px; }
+.form-input { width:100%; background:var(--surface); border:1.5px solid var(--border); border-radius:9px; padding:9px 13px; color:var(--text); font-size:0.88rem; outline:none; font-family:inherit; transition:border-color 0.2s; }
+.form-input:focus { border-color:var(--accent); }
+.form-textarea { min-height:82px; resize:vertical; }
+.rel-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:7px; }
+.rel-opt { padding:9px 10px; border:1.5px solid var(--border); border-radius:9px; text-align:center; cursor:pointer; font-size:0.86rem; transition:all 0.13s; background:#fff; }
+.rel-opt:hover { border-color:var(--accent); }
+.rel-opt.active { background:var(--accent-light); border-color:var(--accent); color:var(--accent); font-weight:700; }
+.modal-footer { display:flex; gap:9px; margin-top:18px; }
+.btn-del { background:var(--danger-light); border:1px solid #fca5a5; color:#dc2626; border-radius:8px; padding:8px 13px; font-size:0.82rem; cursor:pointer; margin-left:auto; }
+.btn-del:hover { background:#fecaca; }
 
-  /* Points */
-  .points-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  @media (max-width: 480px) {
-    .points-grid { grid-template-columns: 1fr; }
-  }
-
-  .points-section h3 {
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 8px;
-    font-weight: 600;
-  }
-
-  .points-section.positive h3 { color: #66ddaa; }
-  .points-section.concern h3 { color: #ffaa66; }
-
-  .point-item {
-    font-size: 0.85rem;
-    line-height: 1.5;
-    padding: 6px 10px;
-    border-radius: 8px;
-    margin-bottom: 6px;
-  }
-
-  .positive .point-item { background: rgba(100, 220, 160, 0.08); color: #99eebb; }
-  .concern .point-item { background: rgba(255, 160, 80, 0.08); color: #ffcc99; }
-
-  /* Loading */
-  .loading {
-    display: none;
-    text-align: center;
-    padding: 40px;
-    color: var(--text-muted);
-  }
-
-  .loading.visible { display: block; }
-
-  .spinner {
-    display: inline-block;
-    width: 36px;
-    height: 36px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 12px;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Error */
-  .error-box {
-    display: none;
-    background: rgba(255, 80, 80, 0.1);
-    border: 1px solid rgba(255, 80, 80, 0.3);
-    border-radius: 10px;
-    padding: 14px 16px;
-    color: #ff9999;
-    font-size: 0.9rem;
-  }
-
-  .error-box.visible { display: block; }
-
-  /* Tabs */
-  .input-tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 16px;
-    background: var(--surface);
-    border-radius: 10px;
-    padding: 4px;
-  }
-
-  .tab-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    border-radius: 7px;
-    padding: 9px 16px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    cursor: pointer;
-    color: var(--text-muted);
-    transition: background 0.15s, color 0.15s;
-  }
-
-  .tab-btn.active {
-    background: var(--card);
-    color: var(--text);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-  }
-
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  /* Image upload zone */
-  .upload-zone {
-    border: 2px dashed var(--border);
-    border-radius: 12px;
-    padding: 44px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-
-  .upload-zone:hover, .upload-zone.dragover {
-    border-color: var(--accent);
-    background: rgba(102, 102, 255, 0.05);
-  }
-
-  .upload-zone-icon { font-size: 2.5rem; margin-bottom: 10px; }
-  .upload-zone p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 4px; }
-  .upload-hint { font-size: 0.75rem; color: #555577; }
-
-  #fileInput { display: none; }
-
-  /* Image preview */
-  .image-preview {
-    display: none;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 14px;
-    background: var(--surface);
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    margin-bottom: 10px;
-  }
-
-  .image-preview.visible { display: flex; }
-
-  .preview-thumb {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 8px;
-    flex-shrink: 0;
-    border: 1px solid var(--border);
-  }
-
-  .preview-info { flex: 1; min-width: 0; }
-
-  .preview-name {
-    font-size: 0.88rem;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 4px;
-  }
-
-  .preview-size { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; }
-
-  .preview-remove {
-    background: rgba(255, 80, 80, 0.12);
-    border: 1px solid rgba(255, 80, 80, 0.3);
-    color: #ff8888;
-    border-radius: 6px;
-    padding: 4px 10px;
-    font-size: 0.78rem;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-
-  .preview-remove:hover { background: rgba(255, 80, 80, 0.25); }
-
-  /* Extracted text */
-  .extracted-text {
-    font-size: 0.82rem;
-    line-height: 1.75;
-    color: var(--text-muted);
-    background: var(--surface);
-    border-radius: 8px;
-    padding: 12px 14px;
-    max-height: 220px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    word-break: break-all;
-    font-family: inherit;
-    margin: 0;
-  }
+/* Toast */
+.copy-toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--text); color:#fff; padding:9px 18px; border-radius:20px; font-size:0.83rem; transition:transform 0.22s; z-index:1000; pointer-events:none; }
+.copy-toast.show { transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>🌡️ 会話の温度計</h1>
-  <p class="subtitle">テキスト貼り付けまたはスクリーンショットで、会話の感情温度を分析します</p>
 
-  <!-- Conversation Input -->
-  <div class="card">
-    <h2>会話の入力</h2>
-    <!-- Tabs -->
-    <div class="input-tabs">
-      <button class="tab-btn active" id="tabText" onclick="switchTab('text')">📝 テキスト入力</button>
-      <button class="tab-btn" id="tabImage" onclick="switchTab('image')">📷 画像アップロード</button>
+<header class="app-header">
+  <div class="app-logo">🌡️</div>
+  <div>
+    <div class="app-title">会話の温度計</div>
+    <div class="app-subtitle">AIで会話の感情を分析・記録します</div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">相手フォルダー</div>
+    <div class="partner-list" id="sidebarList"></div>
+    <button class="btn-add-partner" onclick="openModal()">＋ 相手を追加</button>
+  </aside>
+
+  <main class="main-content">
+    <!-- Mobile partner chips -->
+    <div class="mobile-bar" id="mobileBar"></div>
+
+    <!-- Partner banner -->
+    <div class="partner-banner" id="partnerBanner">
+      <div class="banner-avatar" id="bannerAvatar"></div>
+      <div style="flex:1">
+        <div class="banner-name" id="bannerName"></div>
+        <div class="banner-rel" id="bannerRel"></div>
+      </div>
+      <span class="personalized-badge" id="personalizedBadge">✨ パーソナライズ分析</span>
+      <button class="btn-edit" onclick="openModal(currentPartnerId)">編集</button>
     </div>
-    <!-- Text panel -->
-    <div class="tab-panel active" id="panelText">
-      <textarea id="conversation" placeholder="LINEやメールの会話をここに貼り付けてください...
+
+    <!-- Input card -->
+    <div class="card">
+      <div class="card-label">会話の入力</div>
+      <div class="input-tabs">
+        <button class="tab-btn active" id="tabText" onclick="switchTab('text')">📝 テキスト入力</button>
+        <button class="tab-btn" id="tabImage" onclick="switchTab('image')">📷 画像アップロード</button>
+      </div>
+
+      <div class="tab-panel active" id="panelText">
+        <textarea id="conversation" placeholder="LINEやメールの会話をここに貼り付けてください...
 
 例:
 田中: おはよう！今日のランチどうする？
 鈴木: カフェ行こうよ！新しいお店できたんだって
 田中: いいね！何時にしよっか
-鈴木: 12時でどう？
-田中: ばっちり👍"></textarea>
-      <div class="textarea-footer">
-        <span class="char-count" id="charCount">0 / 20000 文字</span>
-        <div class="action-row">
-          <button class="btn btn-secondary" onclick="loadSample()">サンプルを読み込む</button>
-          <button class="btn" id="analyzeBtn" onclick="analyze()">🔍 分析する</button>
-          <span class="hint">Ctrl+Enter</span>
+鈴木: 12時でどう？"></textarea>
+        <div class="tf-footer">
+          <span class="char-count" id="charCount">0 / 20,000 文字</span>
+          <div class="action-row">
+            <button class="btn btn-secondary btn-sm" onclick="loadSample()">サンプル</button>
+            <button class="btn" id="analyzeBtn" onclick="analyze()">🔍 分析する</button>
+            <span class="hint">Ctrl+Enter</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panelImage">
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp">
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-zone-icon">📷</div>
+          <p>クリックまたはドラッグ&amp;ドロップ</p>
+          <p class="upload-hint">LINEスクリーンショット（JPEG・PNG・GIF・WebP、最大10MB）</p>
+        </div>
+        <div class="image-preview" id="imagePreview">
+          <img class="preview-thumb" id="previewThumb" src="" alt="preview">
+          <div class="preview-info">
+            <div class="preview-name" id="previewName"></div>
+            <div class="preview-size" id="previewSize"></div>
+            <button class="preview-remove" onclick="clearImage()">× 削除</button>
+          </div>
+        </div>
+        <div class="tf-footer">
+          <span class="char-count" id="imageSizeLabel"></span>
+          <div class="action-row">
+            <button class="btn" id="analyzeImageBtn" onclick="analyze()">🔍 画像を分析する</button>
+            <span class="hint">Ctrl+Enter</span>
+          </div>
         </div>
       </div>
     </div>
-    <!-- Image panel -->
-    <div class="tab-panel" id="panelImage">
-      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp">
-      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-        <div class="upload-zone-icon">📷</div>
-        <p>クリックまたはドラッグ&amp;ドロップで画像をアップロード</p>
-        <p class="upload-hint">LINEトーク画面のスクリーンショット（JPEG・PNG・GIF・WebP、最大10MB）</p>
-      </div>
-      <div class="image-preview" id="imagePreview">
-        <img class="preview-thumb" id="previewThumb" src="" alt="preview">
-        <div class="preview-info">
-          <div class="preview-name" id="previewName"></div>
-          <div class="preview-size" id="previewSize"></div>
-          <button class="preview-remove" onclick="clearImage()">× 削除</button>
-        </div>
-      </div>
-      <div class="textarea-footer">
-        <span class="char-count" id="imageSizeLabel"></span>
-        <div class="action-row">
-          <button class="btn" id="analyzeImageBtn" onclick="analyze()">🔍 画像を分析する</button>
-          <span class="hint">Ctrl+Enter</span>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Error -->
-  <div class="error-box" id="errorBox"></div>
+    <div class="error-box" id="errorBox"></div>
 
-  <!-- Loading -->
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p id="loadingMsg">分析中...</p>
-  </div>
-
-  <!-- Results -->
-  <div class="results" id="results">
-    <!-- Thermometer -->
-    <div class="thermometer-card">
-      <div class="temp-display" id="tempDisplay">--</div>
-      <div class="mood-label" id="moodLabel">--</div>
-
-      <svg viewBox="0 0 110 310" width="110" height="310" id="thermometerSvg">
-        <defs>
-          <clipPath id="tubeClip">
-            <rect x="36" y="16" width="28" height="213" rx="12"/>
-          </clipPath>
-          <!-- Tube gradient overlay for glass effect -->
-          <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="white" stop-opacity="0.12"/>
-            <stop offset="0.3" stop-color="white" stop-opacity="0.04"/>
-            <stop offset="1" stop-color="black" stop-opacity="0.1"/>
-          </linearGradient>
-        </defs>
-
-        <!-- Tube outline -->
-        <rect x="35" y="15" width="30" height="215" rx="15" fill="#1a1a35" stroke="#3a3a60" stroke-width="1.5"/>
-
-        <!-- Fill rect (animated) -->
-        <rect id="thermFill" x="36" y="229" width="28" height="0" rx="10" clip-path="url(#tubeClip)" fill="#4466ff"/>
-
-        <!-- Glass overlay -->
-        <rect x="36" y="16" width="28" height="213" rx="12" fill="url(#glassGrad)" clip-path="url(#tubeClip)"/>
-
-        <!-- Tick marks & labels -->
-        <line x1="65" y1="16" x2="72" y2="16" stroke="#4a4a70" stroke-width="1.5"/>
-        <text x="76" y="20" font-size="10" fill="#6666aa" font-family="monospace">100</text>
-
-        <line x1="65" y1="69" x2="70" y2="69" stroke="#4a4a70" stroke-width="1"/>
-        <text x="74" y="73" font-size="10" fill="#6666aa" font-family="monospace">75</text>
-
-        <line x1="65" y1="123" x2="72" y2="123" stroke="#4a4a70" stroke-width="1.5"/>
-        <text x="76" y="127" font-size="10" fill="#6666aa" font-family="monospace">50</text>
-
-        <line x1="65" y1="176" x2="70" y2="176" stroke="#4a4a70" stroke-width="1"/>
-        <text x="74" y="180" font-size="10" fill="#6666aa" font-family="monospace">25</text>
-
-        <line x1="65" y1="229" x2="72" y2="229" stroke="#4a4a70" stroke-width="1.5"/>
-        <text x="76" y="233" font-size="10" fill="#6666aa" font-family="monospace">0</text>
-
-        <!-- Bulb -->
-        <circle cx="50" cy="257" r="28" fill="#1a1a35" stroke="#3a3a60" stroke-width="1.5"/>
-        <circle id="bulbFill" cx="50" cy="257" r="26" fill="#4466ff"/>
-        <circle cx="50" cy="257" r="26" fill="url(#glassGrad)"/>
-      </svg>
-
-      <div class="zone-label" id="zoneLabel"></div>
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p id="loadingMsg">分析中...</p>
     </div>
 
-    <!-- Right column -->
-    <div class="right-col">
-      <!-- Extracted text (image mode only) -->
+    <!-- Results -->
+    <div class="results" id="results">
+
+      <div class="card">
+        <div class="thermo-grid">
+          <div class="thermo-card">
+            <div class="temp-display" id="tempDisplay">--</div>
+            <div class="mood-label" id="moodLabel">--</div>
+            <svg viewBox="0 0 110 310" width="96" height="270">
+              <defs>
+                <clipPath id="tubeClip"><rect x="36" y="16" width="28" height="213" rx="12"/></clipPath>
+                <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="white" stop-opacity="0.18"/>
+                  <stop offset="0.35" stop-color="white" stop-opacity="0.05"/>
+                  <stop offset="1" stop-color="black" stop-opacity="0.05"/>
+                </linearGradient>
+              </defs>
+              <rect x="35" y="15" width="30" height="215" rx="15" fill="#f0eeff" stroke="#d4c8ff" stroke-width="1.5"/>
+              <rect id="thermFill" x="36" y="229" width="28" height="0" rx="10" clip-path="url(#tubeClip)" fill="#7c6fff"/>
+              <rect x="36" y="16" width="28" height="213" rx="12" fill="url(#glassGrad)" clip-path="url(#tubeClip)"/>
+              <line x1="65" y1="16" x2="72" y2="16" stroke="#c4b8ff" stroke-width="1.5"/>
+              <text x="76" y="20" font-size="10" fill="#9990cc" font-family="monospace">100</text>
+              <line x1="65" y1="69" x2="70" y2="69" stroke="#c4b8ff" stroke-width="1"/>
+              <text x="74" y="73" font-size="10" fill="#9990cc" font-family="monospace">75</text>
+              <line x1="65" y1="123" x2="72" y2="123" stroke="#c4b8ff" stroke-width="1.5"/>
+              <text x="76" y="127" font-size="10" fill="#9990cc" font-family="monospace">50</text>
+              <line x1="65" y1="176" x2="70" y2="176" stroke="#c4b8ff" stroke-width="1"/>
+              <text x="74" y="180" font-size="10" fill="#9990cc" font-family="monospace">25</text>
+              <line x1="65" y1="229" x2="72" y2="229" stroke="#c4b8ff" stroke-width="1.5"/>
+              <text x="76" y="233" font-size="10" fill="#9990cc" font-family="monospace">0</text>
+              <circle cx="50" cy="257" r="28" fill="#f0eeff" stroke="#d4c8ff" stroke-width="1.5"/>
+              <circle id="bulbFill" cx="50" cy="257" r="26" fill="#7c6fff"/>
+              <circle cx="50" cy="257" r="26" fill="url(#glassGrad)"/>
+            </svg>
+            <div class="zone-label" id="zoneLabel"></div>
+          </div>
+
+          <div>
+            <div style="margin-bottom:16px;">
+              <div class="card-label">感情分析サマリー</div>
+              <p class="summary-text" id="summaryText"></p>
+            </div>
+            <div>
+              <div class="card-label">感情の内訳</div>
+              <div class="emotion-bars" id="emotionBars"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="card" id="extractedCard" style="display:none">
-        <h2>📷 読み取られた会話テキスト</h2>
+        <div class="card-label">📷 読み取られた会話テキスト</div>
         <pre class="extracted-text" id="extractedText"></pre>
       </div>
 
-      <!-- Summary -->
       <div class="card">
-        <h2>感情分析</h2>
-        <p class="summary-text" id="summaryText"></p>
-      </div>
-
-      <!-- Emotions -->
-      <div class="card">
-        <h2>感情の内訳</h2>
-        <div class="emotion-bars" id="emotionBars"></div>
-      </div>
-
-      <!-- Points -->
-      <div class="card">
-        <h2>詳細ポイント</h2>
-        <div class="points-grid">
+        <div class="card-label">詳細ポイント</div>
+        <div class="points-grid" style="margin-bottom:16px;">
           <div class="points-section positive">
             <h3>✓ 良い点</h3>
             <div id="positivePoints"></div>
@@ -572,80 +494,308 @@
             <div id="concernPoints"></div>
           </div>
         </div>
-      </div>
-
-      <!-- Advice -->
-      <div class="card">
-        <h2>アドバイス</h2>
+        <div class="card-label">アドバイス</div>
         <p class="advice-text" id="adviceText"></p>
       </div>
+
+      <div class="card">
+        <div class="card-label">💬 次の返信提案（クリックでコピー）</div>
+        <div class="reply-list" id="replyList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">この診断は合っていましたか？</div>
+        <div id="fbOptions" class="fb-options">
+          <button class="fb-btn" onclick="selectFeedback('accurate',this)">😊 だいたい合ってた</button>
+          <button class="fb-btn" onclick="selectFeedback('slightly',this)">🤔 少し違った</button>
+          <button class="fb-btn" onclick="selectFeedback('wrong',this)">😅 全然違った</button>
+        </div>
+        <div class="fb-note-area" id="fbNoteArea">
+          <p style="font-size:0.83rem;color:var(--text-muted);margin-bottom:7px;">実際はどうでしたか？</p>
+          <textarea class="fb-note" id="fbNote" placeholder="実際の状況を教えてください..."></textarea>
+          <button class="btn btn-sm btn-green" onclick="submitFeedback()">送信</button>
+        </div>
+        <p class="fb-thanks" id="fbThanks">ありがとうございます！次回の分析に活かします ✨</p>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="history-section" id="historySection">
+      <div class="card">
+        <div class="card-label">📈 感情温度の推移</div>
+        <div class="chart-wrap"><canvas id="tempChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-label">📋 診断履歴</div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+      <div id="scoreCardWrapper" style="display:none;margin-bottom:14px;">
+        <div class="score-card" id="scoreCard">
+          <div class="sc-header">
+            <div>
+              <div class="sc-title">関係スコアカード</div>
+              <div class="sc-name" id="scName"></div>
+            </div>
+            <div style="text-align:right">
+              <div class="sc-score" id="scScore">--</div>
+              <div class="sc-grade" id="scGrade"></div>
+            </div>
+          </div>
+          <div class="sc-stats">
+            <div class="sc-stat"><div class="sc-stat-val" id="scAvg">--</div><div class="sc-stat-label">平均温度</div></div>
+            <div class="sc-stat"><div class="sc-stat-val" id="scCount">--</div><div class="sc-stat-label">診断回数</div></div>
+            <div class="sc-stat"><div class="sc-stat-val" id="scTrendVal">--</div><div class="sc-stat-label">トレンド</div></div>
+          </div>
+          <div class="sc-trend" id="scTrendText"></div>
+          <button class="btn-save-img" onclick="saveScoreCard()">📸 画像として保存</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Partner Modal -->
+<div class="modal-overlay" id="partnerModal" onclick="onModalBg(event)">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">相手を追加</div>
+    <div class="form-group">
+      <label class="form-label">名前・ニックネーム</label>
+      <input type="text" class="form-input" id="modalName" placeholder="田中さん">
+    </div>
+    <div class="form-group">
+      <label class="form-label">関係性</label>
+      <div class="rel-grid">
+        <button class="rel-opt" data-rel="friend" onclick="selectRel(this)">👫 友達</button>
+        <button class="rel-opt" data-rel="lover" onclick="selectRel(this)">💑 恋人</button>
+        <button class="rel-opt" data-rel="work"   onclick="selectRel(this)">💼 職場</button>
+        <button class="rel-opt" data-rel="family" onclick="selectRel(this)">👨‍👩‍👧 家族</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">プロフィール・特徴メモ（任意）</label>
+      <textarea class="form-input form-textarea" id="modalProfile" placeholder="例: もともと文章が短い、絵文字をほぼ使わない、返信が遅め、など"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="savePartner()">保存</button>
+      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+      <button class="btn-del" id="btnDel" style="display:none" onclick="deletePartner()">削除</button>
     </div>
   </div>
 </div>
 
+<div class="copy-toast" id="copyToast">コピーしました！</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-// --- Char count ---
-const convTextarea = document.getElementById('conversation');
-convTextarea.addEventListener('input', updateCharCount);
-function updateCharCount() {
-  const len = convTextarea.value.length;
-  const el = document.getElementById('charCount');
-  el.textContent = `${len.toLocaleString()} / 20,000 文字`;
-  el.style.color = len > 18000 ? '#ff8866' : 'var(--text-muted)';
+// ═══════════════════════════════
+// Storage
+// ═══════════════════════════════
+const DB = {
+  _key: 'conv_thermo_v1',
+  get()  { try { return JSON.parse(localStorage.getItem(this._key) || '{"partners":[]}'); } catch { return {partners:[]}; } },
+  set(d) { localStorage.setItem(this._key, JSON.stringify(d)); },
+  partners()      { return this.get().partners; },
+  partner(id)     { return this.partners().find(p => p.id === id); },
+  addPartner(p)   { const d=this.get(); d.partners.push(p); this.set(d); },
+  updatePartner(id,u) { const d=this.get(); const i=d.partners.findIndex(p=>p.id===id); if(i>=0){d.partners[i]={...d.partners[i],...u};this.set(d);} },
+  deletePartner(id)   { const d=this.get(); d.partners=d.partners.filter(p=>p.id!==id); this.set(d); },
+  addHistory(pid,entry) {
+    const d=this.get(); const i=d.partners.findIndex(p=>p.id===pid); if(i<0)return;
+    if(!d.partners[i].history)d.partners[i].history=[];
+    d.partners[i].history.push(entry);
+    if(d.partners[i].history.length>30) d.partners[i].history=d.partners[i].history.slice(-30);
+    this.set(d);
+  },
+  updateFeedback(pid,eid,fb) {
+    const d=this.get(); const pi=d.partners.findIndex(p=>p.id===pid); if(pi<0)return;
+    const hi=d.partners[pi].history.findIndex(h=>h.id===eid); if(hi>=0){d.partners[pi].history[hi].feedback=fb;this.set(d);}
+  },
+};
+
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+// ═══════════════════════════════
+// State
+// ═══════════════════════════════
+let currentPartnerId = null;
+let currentTab = 'text';
+let uploadedImage = null;
+let lastAnalysisId = null;
+let currentSuggestions = [];
+let selectedFbRating = null;
+let tempChartInst = null;
+
+// ═══════════════════════════════
+// Partner colors/labels
+// ═══════════════════════════════
+const REL = {
+  friend: { label:'👫 友達', bg:'#dbeafe', fg:'#2563eb' },
+  lover:  { label:'💑 恋人', bg:'#fce7f3', fg:'#db2777' },
+  work:   { label:'💼 職場', bg:'#ede9fe', fg:'#7c3aed' },
+  family: { label:'👨‍👩‍👧 家族', bg:'#d1fae5', fg:'#059669' },
+};
+function relInfo(rel) { return REL[rel] || { label:'', bg:'#f0eeff', fg:'#7c6fff' }; }
+
+// ═══════════════════════════════
+// Render partner lists
+// ═══════════════════════════════
+function renderPartners() {
+  const partners = DB.partners();
+
+  // Sidebar
+  document.getElementById('sidebarList').innerHTML = partners.map(p => {
+    const ri = relInfo(p.relationship);
+    return `<div class="partner-item ${p.id===currentPartnerId?'active':''}" onclick="selectPartner('${p.id}')">
+      <div class="partner-avatar" style="background:${ri.bg};color:${ri.fg}">${initial(p.name)}</div>
+      <div>
+        <div class="partner-name">${esc(p.name)}</div>
+        <div class="partner-rel-label">${ri.label}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Mobile bar
+  document.getElementById('mobileBar').innerHTML =
+    partners.map(p => `<button class="m-chip ${p.id===currentPartnerId?'active':''}" onclick="selectPartner('${p.id}')">${initial(p.name)} ${esc(p.name)}</button>`).join('')
+    + `<button class="m-chip add" onclick="openModal()">＋ 追加</button>`;
 }
 
-// --- Tab state ---
-let currentTab = 'text';
+function selectPartner(id) {
+  currentPartnerId = (id === currentPartnerId) ? null : id;
+  renderPartners();
+  updateBanner();
+  renderHistory();
+}
+
+function updateBanner() {
+  const banner = document.getElementById('partnerBanner');
+  if (!currentPartnerId) { banner.classList.remove('visible'); return; }
+  const p = DB.partner(currentPartnerId);
+  if (!p) { banner.classList.remove('visible'); return; }
+  const ri = relInfo(p.relationship);
+  banner.classList.add('visible');
+  const av = document.getElementById('bannerAvatar');
+  av.textContent = initial(p.name);
+  av.style.background = ri.bg;
+  av.style.color = ri.fg;
+  document.getElementById('bannerName').textContent = p.name;
+  document.getElementById('bannerRel').textContent = ri.label;
+  const hasHist = p.history && p.history.length > 0;
+  document.getElementById('personalizedBadge').classList.toggle('visible', hasHist);
+}
+
+// ═══════════════════════════════
+// Modal
+// ═══════════════════════════════
+let editingId = null;
+let selectedRel = null;
+
+function openModal(partnerId) {
+  editingId = partnerId || null;
+  selectedRel = null;
+  document.querySelectorAll('.rel-opt').forEach(e => e.classList.remove('active'));
+  document.getElementById('modalTitle').textContent = editingId ? '相手を編集' : '相手を追加';
+  document.getElementById('modalName').value = '';
+  document.getElementById('modalProfile').value = '';
+  document.getElementById('btnDel').style.display = editingId ? '' : 'none';
+  if (editingId) {
+    const p = DB.partner(editingId);
+    if (p) {
+      document.getElementById('modalName').value = p.name || '';
+      document.getElementById('modalProfile').value = p.profile || '';
+      selectedRel = p.relationship;
+      const el = document.querySelector(`.rel-opt[data-rel="${p.relationship}"]`);
+      if (el) el.classList.add('active');
+    }
+  }
+  document.getElementById('partnerModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('partnerModal').classList.remove('open'); editingId = null; }
+
+function onModalBg(e) { if (e.target === document.getElementById('partnerModal')) closeModal(); }
+
+function selectRel(el) {
+  document.querySelectorAll('.rel-opt').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  selectedRel = el.dataset.rel;
+}
+
+function savePartner() {
+  const name = document.getElementById('modalName').value.trim();
+  if (!name) { alert('名前を入力してください。'); return; }
+  if (!selectedRel) { alert('関係性を選択してください。'); return; }
+  const profile = document.getElementById('modalProfile').value.trim();
+  if (editingId) {
+    DB.updatePartner(editingId, { name, relationship: selectedRel, profile });
+    if (currentPartnerId === editingId) updateBanner();
+  } else {
+    const p = { id: uid(), name, relationship: selectedRel, profile, history: [], trendMemo: '' };
+    DB.addPartner(p);
+    currentPartnerId = p.id;
+  }
+  closeModal();
+  renderPartners();
+  updateBanner();
+  renderHistory();
+}
+
+function deletePartner() {
+  if (!editingId) return;
+  const p = DB.partner(editingId);
+  if (!confirm(`「${p?.name}」を削除しますか？\n履歴も全て削除されます。`)) return;
+  DB.deletePartner(editingId);
+  if (currentPartnerId === editingId) currentPartnerId = null;
+  closeModal();
+  renderPartners();
+  updateBanner();
+  renderHistory();
+}
+
+// ═══════════════════════════════
+// Tabs / Input
+// ═══════════════════════════════
+const convTA = document.getElementById('conversation');
+convTA.addEventListener('input', () => {
+  const len = convTA.value.length;
+  const el = document.getElementById('charCount');
+  el.textContent = `${len.toLocaleString()} / 20,000 文字`;
+  el.style.color = len > 18000 ? '#ef4444' : 'var(--text-muted)';
+});
 
 function switchTab(tab) {
   currentTab = tab;
-  document.getElementById('tabText').classList.toggle('active', tab === 'text');
-  document.getElementById('tabImage').classList.toggle('active', tab === 'image');
-  document.getElementById('panelText').classList.toggle('active', tab === 'text');
-  document.getElementById('panelImage').classList.toggle('active', tab === 'image');
+  ['text','image'].forEach(t => {
+    document.getElementById('tab' + (t==='text'?'Text':'Image')).classList.toggle('active', t===tab);
+    document.getElementById('panel' + (t==='text'?'Text':'Image')).classList.toggle('active', t===tab);
+  });
   hideError();
 }
 
-// --- Image upload state ---
-let uploadedImage = null;
-
 const fileInput = document.getElementById('fileInput');
-fileInput.addEventListener('change', e => {
-  if (e.target.files[0]) handleFile(e.target.files[0]);
-});
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
 
 const uploadZone = document.getElementById('uploadZone');
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
 uploadZone.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadZone.classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file) handleFile(file);
+  e.preventDefault(); uploadZone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
 });
 
 function handleFile(file) {
-  const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-  if (!validTypes.includes(file.type)) {
-    showError('対応形式はJPEG、PNG、GIF、WebPのみです。');
-    return;
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    showError('ファイルサイズは10MB以下にしてください。');
-    return;
-  }
+  if (!['image/jpeg','image/png','image/gif','image/webp'].includes(file.type)) { showError('対応形式はJPEG、PNG、GIF、WebPのみです。'); return; }
+  if (file.size > 10*1024*1024) { showError('ファイルサイズは10MB以下にしてください。'); return; }
   hideError();
-
   const reader = new FileReader();
   reader.onload = e => {
-    const dataUrl = e.target.result;
-    const base64 = dataUrl.split(',')[1];
-    uploadedImage = { data: base64, mediaType: file.type, name: file.name, size: file.size };
-
-    document.getElementById('previewThumb').src = dataUrl;
+    const url = e.target.result;
+    uploadedImage = { data: url.split(',')[1], mediaType: file.type, name: file.name, size: file.size };
+    document.getElementById('previewThumb').src = url;
     document.getElementById('previewName').textContent = file.name;
-    document.getElementById('previewSize').textContent = formatBytes(file.size);
-    document.getElementById('imageSizeLabel').textContent = formatBytes(file.size);
+    document.getElementById('previewSize').textContent = fmtBytes(file.size);
+    document.getElementById('imageSizeLabel').textContent = fmtBytes(file.size);
     uploadZone.style.display = 'none';
     document.getElementById('imagePreview').classList.add('visible');
   };
@@ -653,27 +803,16 @@ function handleFile(file) {
 }
 
 function clearImage() {
-  uploadedImage = null;
-  fileInput.value = '';
+  uploadedImage = null; fileInput.value = '';
   uploadZone.style.display = '';
   document.getElementById('imagePreview').classList.remove('visible');
   document.getElementById('imageSizeLabel').textContent = '';
 }
 
-function formatBytes(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-}
+document.addEventListener('keydown', e => { if (e.ctrlKey && e.key === 'Enter') analyze(); });
 
-// --- Keyboard shortcut ---
-document.addEventListener('keydown', e => {
-  if (e.ctrlKey && e.key === 'Enter') analyze();
-});
-
-// --- Sample text ---
 function loadSample() {
-  convTextarea.value = `田中: ねえ、昨日のミーティングどうだった？
+  convTA.value = `田中: ねえ、昨日のミーティングどうだった？
 鈴木: うーん、正直ちょっと疲れたかな。長かったし
 田中: だよね。でも山田さんのプレゼン面白かったじゃん！
 鈴木: あーあれは良かった！アイデアが斬新で
@@ -683,184 +822,323 @@ function loadSample() {
 鈴木: ありがとう、心強い！週末に少し考えてみる
 田中: 楽しみにしてるよ😊
 鈴木: ふふ、プレッシャーかけないでよ笑`;
-  updateCharCount();
+  convTA.dispatchEvent(new Event('input'));
 }
 
-// --- Color helpers ---
-function tempColor(t) {
-  const stops = [
-    [0,   [30,  80,  220]],
-    [15,  [60,  170, 240]],
-    [35,  [80,  220, 200]],
-    [50,  [200, 220, 80]],
-    [65,  [240, 170, 40]],
-    [80,  [240, 90,  40]],
-    [100, [200, 20,  20]],
-  ];
-  for (let i = 0; i < stops.length - 1; i++) {
-    const [t0, c0] = stops[i];
-    const [t1, c1] = stops[i + 1];
-    if (t <= t1) {
-      const f = (t - t0) / (t1 - t0);
-      return `rgb(${Math.round(c0[0]+(c1[0]-c0[0])*f)},${Math.round(c0[1]+(c1[1]-c0[1])*f)},${Math.round(c0[2]+(c1[2]-c0[2])*f)})`;
-    }
+// ═══════════════════════════════
+// Past summary builder
+// ═══════════════════════════════
+function buildPastSummary(partner) {
+  if (!partner?.history?.length) return null;
+  const h = partner.history;
+  const recent = h.slice(-5);
+  const avgTemp = Math.round(recent.reduce((s,x)=>s+x.result.temperature,0)/recent.length);
+  let s = `これまでの分析: 計${h.length}回 / 平均感情温度: ${avgTemp}°\n`;
+  if (partner.trendMemo) s += `AI傾向メモ: ${partner.trendMemo}\n`;
+  const fb = h.filter(x=>x.feedback);
+  if (fb.length) {
+    const acc = fb.filter(x=>x.feedback.rating==='accurate').length;
+    s += `フィードバック: ${fb.length}件中${acc}件が「合ってた」\n`;
+    const notes = fb.filter(x=>x.feedback.note).map(x=>x.feedback.note).slice(-2);
+    if (notes.length) s += `フィードバックメモ: ${notes.join(' / ')}\n`;
   }
-  return 'rgb(200,20,20)';
+  return s;
 }
 
-function zoneLabel(t) {
-  if (t <= 15)  return '❄️ 極寒 — 非常に冷たい雰囲気';
-  if (t <= 30)  return '🧊 冷たい — 距離感がある';
-  if (t <= 45)  return '😐 やや冷たい — 少し硬い';
-  if (t <= 55)  return '🌤 中立 — 普通の雰囲気';
-  if (t <= 70)  return '😊 温かい — 良い関係';
-  if (t <= 85)  return '🌟 とても温かい — 活発で良好';
-  return              '🔥 とても熱い — 情熱的・活気';
-}
-
-// --- Animation ---
-const emotionHues = [210, 150, 40, 280, 0, 180, 320];
-function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
-
-let animFrame = null;
-function animateThermometer(targetTemp) {
-  if (animFrame) cancelAnimationFrame(animFrame);
-  const fill = document.getElementById('thermFill');
-  const bulb = document.getElementById('bulbFill');
-  const tempDisplay = document.getElementById('tempDisplay');
-  const start = performance.now();
-  const duration = 1200;
-
-  function step(now) {
-    const rawT = Math.min((now - start) / duration, 1);
-    const t = easeOut(rawT);
-    const cur = Math.round(targetTemp * t);
-    const color = tempColor(cur);
-
-    const maxH = 213;
-    const fillH = (cur / 100) * maxH;
-    const fillY = 229 - fillH;
-    fill.setAttribute('height', fillH);
-    fill.setAttribute('y', fillY);
-    fill.setAttribute('fill', color);
-    bulb.setAttribute('fill', color);
-
-    tempDisplay.textContent = cur + '°';
-    tempDisplay.style.color = color;
-
-    if (rawT < 1) animFrame = requestAnimationFrame(step);
-  }
-
-  animFrame = requestAnimationFrame(step);
-}
-
-function animateEmotionBars(emotions) {
-  emotions.forEach((em, i) => {
-    const hue = emotionHues[i % emotionHues.length];
-    const bar = document.getElementById(`bar-${i}`);
-    if (bar) {
-      setTimeout(() => {
-        bar.style.width = em.intensity + '%';
-        bar.style.background = `hsl(${hue}, 70%, 55%)`;
-      }, 200 + i * 80);
-    }
-  });
-}
-
-// --- Main analyze ---
+// ═══════════════════════════════
+// Analyze
+// ═══════════════════════════════
 async function analyze() {
-  setLoading(true, currentTab === 'image' ? '画像を読み取り・分析中...' : '会話を分析中...');
+  const partner = currentPartnerId ? DB.partner(currentPartnerId) : null;
+  const isPersonalized = !!(partner?.history?.length);
+  setLoading(true, currentTab==='image' ? '画像を読み取り・分析中...' : '会話を分析中...');
   hideError();
   document.getElementById('results').classList.remove('visible');
 
   try {
     let resp;
     if (currentTab === 'image') {
-      if (!uploadedImage) {
-        showError('画像をアップロードしてください。');
-        setLoading(false);
-        return;
-      }
+      if (!uploadedImage) { showError('画像をアップロードしてください。'); setLoading(false); return; }
       resp = await fetch('/api/analyze-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageData: uploadedImage.data, mediaType: uploadedImage.mediaType }),
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ imageData:uploadedImage.data, mediaType:uploadedImage.mediaType,
+          partnerProfile:partner?.profile||null, pastSummary:buildPastSummary(partner), isPersonalized }),
       });
     } else {
-      const conversation = convTextarea.value.trim();
-      if (!conversation) {
-        showError('会話テキストを入力してください。');
-        setLoading(false);
-        return;
-      }
+      const conv = convTA.value.trim();
+      if (!conv) { showError('会話テキストを入力してください。'); setLoading(false); return; }
       resp = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversation }),
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ conversation:conv,
+          partnerProfile:partner?.profile||null, pastSummary:buildPastSummary(partner), isPersonalized }),
       });
     }
 
     const data = await resp.json();
     if (!resp.ok) { showError(data.error || 'エラーが発生しました。'); return; }
 
-    renderResults(data, currentTab === 'image');
-  } catch (err) {
+    // Save history
+    if (currentPartnerId) {
+      const eid = uid();
+      lastAnalysisId = eid;
+      DB.addHistory(currentPartnerId, {
+        id: eid, date: new Date().toISOString(),
+        result: { temperature: data.temperature, mood: data.mood, summary: data.summary },
+        feedback: null,
+      });
+      if (data.trend_memo) DB.updatePartner(currentPartnerId, { trendMemo: data.trend_memo });
+    } else { lastAnalysisId = null; }
+
+    renderResults(data, currentTab==='image', isPersonalized);
+    renderHistory();
+  } catch(err) {
     showError('通信エラー: ' + err.message);
   } finally {
     setLoading(false);
   }
 }
 
-function renderResults(data, showExtracted) {
+// ═══════════════════════════════
+// Results
+// ═══════════════════════════════
+function tempColor(t) {
+  const stops=[[0,[80,140,255]],[20,[80,200,220]],[40,[100,215,155]],[50,[175,210,75]],[65,[255,168,38]],[80,[255,88,55]],[100,[215,28,28]]];
+  for(let i=0;i<stops.length-1;i++){
+    const[t0,c0]=stops[i],[t1,c1]=stops[i+1];
+    if(t<=t1){const f=(t-t0)/(t1-t0);return`rgb(${Math.round(c0[0]+(c1[0]-c0[0])*f)},${Math.round(c0[1]+(c1[1]-c0[1])*f)},${Math.round(c0[2]+(c1[2]-c0[2])*f)})`;}
+  }
+  return'rgb(215,28,28)';
+}
+function zoneLabel(t){
+  if(t<=15)return'❄️ 極寒 — 非常に冷たい雰囲気';
+  if(t<=30)return'🧊 冷たい — 距離感がある';
+  if(t<=45)return'😐 やや冷たい — 少し硬い';
+  if(t<=55)return'🌤 中立 — 普通の雰囲気';
+  if(t<=70)return'😊 温かい — 良い関係';
+  if(t<=85)return'🌟 とても温かい — 活発で良好';
+  return'🔥 とても熱い — 情熱的・活気';
+}
+
+let animFrame=null;
+function animateThermometer(target){
+  if(animFrame)cancelAnimationFrame(animFrame);
+  const fill=document.getElementById('thermFill'),bulb=document.getElementById('bulbFill'),disp=document.getElementById('tempDisplay');
+  const start=performance.now(),dur=1200;
+  function step(now){
+    const rawT=Math.min((now-start)/dur,1),t=1-Math.pow(1-rawT,3),cur=Math.round(target*t),color=tempColor(cur);
+    const fillH=(cur/100)*213,fillY=229-fillH;
+    fill.setAttribute('height',fillH);fill.setAttribute('y',fillY);fill.setAttribute('fill',color);
+    bulb.setAttribute('fill',color);disp.textContent=cur+'°';disp.style.color=color;
+    if(rawT<1)animFrame=requestAnimationFrame(step);
+  }
+  animFrame=requestAnimationFrame(step);
+}
+
+const emotionHues=[240,160,38,280,18,190,325];
+function animateBars(emotions){
+  emotions.forEach((em,i)=>{
+    const bar=document.getElementById('bar-'+i);
+    if(bar)setTimeout(()=>{bar.style.width=em.intensity+'%';bar.style.background=`hsl(${emotionHues[i%emotionHues.length]},62%,58%)`;},180+i*75);
+  });
+}
+
+function renderResults(data, showExtracted, isPersonalized){
   animateThermometer(data.temperature);
-  document.getElementById('moodLabel').textContent = data.mood || '';
-  document.getElementById('zoneLabel').textContent = zoneLabel(data.temperature);
+  document.getElementById('moodLabel').textContent=data.mood||'';
+  document.getElementById('zoneLabel').textContent=zoneLabel(data.temperature);
+  document.getElementById('summaryText').textContent=data.summary||'';
+  document.getElementById('adviceText').textContent=data.advice||'';
 
-  document.getElementById('summaryText').textContent = data.summary || '';
-  document.getElementById('adviceText').textContent = data.advice || '';
-
-  const barsEl = document.getElementById('emotionBars');
-  barsEl.innerHTML = (data.emotions || []).map((em, i) => `
+  document.getElementById('emotionBars').innerHTML=(data.emotions||[]).map((em,i)=>`
     <div class="emotion-row">
-      <div class="emotion-name">${em.emoji || ''} ${em.name || ''}</div>
+      <div class="emotion-name">${em.emoji||''} ${em.name||''}</div>
       <div class="bar-bg"><div class="bar-fill" id="bar-${i}"></div></div>
       <div class="bar-val">${em.intensity}</div>
-    </div>
-  `).join('');
-  animateEmotionBars(data.emotions || []);
+    </div>`).join('');
+  animateBars(data.emotions||[]);
 
-  const pos = document.getElementById('positivePoints');
-  const con = document.getElementById('concernPoints');
-  pos.innerHTML = (data.positive_points || []).map(p => `<div class="point-item">${p}</div>`).join('');
-  con.innerHTML = (data.concern_points || []).map(p => `<div class="point-item">${p}</div>`).join('');
+  document.getElementById('positivePoints').innerHTML=(data.positive_points||[]).map(p=>`<div class="point-item">${esc(p)}</div>`).join('');
+  document.getElementById('concernPoints').innerHTML =(data.concern_points ||[]).map(p=>`<div class="point-item">${esc(p)}</div>`).join('');
 
-  const extractedCard = document.getElementById('extractedCard');
-  if (showExtracted && data.extracted_text) {
-    document.getElementById('extractedText').textContent = data.extracted_text;
-    extractedCard.style.display = '';
+  currentSuggestions = data.reply_suggestions || [];
+  document.getElementById('replyList').innerHTML = currentSuggestions.map((s,i)=>`
+    <div class="reply-item" onclick="copyReply(${i})">
+      <span class="reply-num">${i+1}</span>
+      <span class="reply-text">${esc(s)}</span>
+    </div>`).join('');
+
+  const ec=document.getElementById('extractedCard');
+  if(showExtracted&&data.extracted_text){document.getElementById('extractedText').textContent=data.extracted_text;ec.style.display='';}
+  else{ec.style.display='none';}
+
+  resetFeedback();
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ═══════════════════════════════
+// Copy reply
+// ═══════════════════════════════
+function copyReply(idx){
+  const text=currentSuggestions[idx];
+  if(!text)return;
+  navigator.clipboard.writeText(text).catch(()=>{});
+  const t=document.getElementById('copyToast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1700);
+}
+
+// ═══════════════════════════════
+// Feedback
+// ═══════════════════════════════
+function resetFeedback(){
+  selectedFbRating=null;
+  document.querySelectorAll('.fb-btn').forEach(b=>b.className='fb-btn');
+  document.getElementById('fbNoteArea').classList.remove('visible');
+  document.getElementById('fbNote').value='';
+  document.getElementById('fbThanks').classList.remove('visible');
+  document.getElementById('fbOptions').style.display='';
+}
+
+function selectFeedback(rating, btn){
+  selectedFbRating=rating;
+  document.querySelectorAll('.fb-btn').forEach(b=>b.className='fb-btn');
+  const map={accurate:'sel-accurate',slightly:'sel-slightly',wrong:'sel-wrong'};
+  btn.classList.add(map[rating]);
+  if(rating==='accurate'){
+    saveFeedback({rating,note:''});
   } else {
-    extractedCard.style.display = 'none';
+    document.getElementById('fbNoteArea').classList.add('visible');
+  }
+}
+
+function submitFeedback(){
+  saveFeedback({rating:selectedFbRating,note:document.getElementById('fbNote').value.trim()});
+}
+
+function saveFeedback(fb){
+  if(currentPartnerId&&lastAnalysisId){
+    DB.updateFeedback(currentPartnerId,lastAnalysisId,fb);
+    renderHistory();
+  }
+  document.getElementById('fbThanks').classList.add('visible');
+  document.getElementById('fbOptions').style.display='none';
+  document.getElementById('fbNoteArea').classList.remove('visible');
+}
+
+// ═══════════════════════════════
+// History & Chart
+// ═══════════════════════════════
+function renderHistory(){
+  const partner = currentPartnerId ? DB.partner(currentPartnerId) : null;
+  const section = document.getElementById('historySection');
+  if(!partner?.history?.length){ section.classList.remove('visible'); return; }
+  section.classList.add('visible');
+  const hist = partner.history;
+  renderChart(hist);
+  renderHistoryList(hist);
+  if(hist.length>=2){ document.getElementById('scoreCardWrapper').style.display=''; renderScoreCard(partner,hist); }
+  else { document.getElementById('scoreCardWrapper').style.display='none'; }
+}
+
+function renderChart(hist){
+  const ctx=document.getElementById('tempChart').getContext('2d');
+  const labels=hist.map(h=>{const d=new Date(h.date);return`${d.getMonth()+1}/${d.getDate()}`;});
+  const temps=hist.map(h=>h.result.temperature);
+  const colors=temps.map(t=>tempColor(t));
+  if(tempChartInst)tempChartInst.destroy();
+  tempChartInst=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[{label:'感情温度',data:temps,borderColor:'#7c6fff',backgroundColor:'rgba(124,111,255,0.07)',borderWidth:2.5,pointBackgroundColor:colors,pointBorderColor:colors,pointRadius:5,pointHoverRadius:7,fill:true,tension:0.32}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`温度: ${c.raw}°`}}},scales:{y:{min:0,max:100,ticks:{color:'#9990cc',font:{size:11}},grid:{color:'#f0eeff'}},x:{ticks:{color:'#9990cc',font:{size:11}},grid:{color:'#f0eeff'}}}},
+  });
+}
+
+function renderHistoryList(hist){
+  const fbLabel={accurate:'😊 合ってた',slightly:'🤔 少し違った',wrong:'😅 違った'};
+  document.getElementById('historyList').innerHTML=[...hist].reverse().map(h=>{
+    const color=tempColor(h.result.temperature);
+    const d=new Date(h.date);
+    const dateStr=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    const fb=h.feedback?`<div class="history-fb">${fbLabel[h.feedback.rating]||''}</div>`:'';
+    return`<div class="history-item">
+      <div class="history-temp" style="color:${color}">${h.result.temperature}°</div>
+      <div class="history-meta">
+        <div class="history-mood">${esc(h.result.mood||'')}</div>
+        <div class="history-date">${dateStr}</div>
+        ${fb}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderScoreCard(partner, hist){
+  const temps=hist.map(h=>h.result.temperature);
+  const avg=Math.round(temps.reduce((s,t)=>s+t,0)/temps.length);
+  const variance=Math.sqrt(temps.reduce((s,t)=>s+Math.pow(t-avg,2),0)/temps.length);
+  const stabilityBonus=Math.max(0,14-variance/2);
+
+  let trendLabel='→ 安定';
+  let trendBonus=0;
+  if(temps.length>=3){
+    const recentAvg=temps.slice(-3).reduce((s,t)=>s+t,0)/3;
+    const olderAvg=temps.slice(0,-3).reduce((s,t)=>s+t,0)/(temps.length-3)||recentAvg;
+    if(recentAvg>olderAvg+5){trendLabel='↑ 上昇中';trendBonus=10;}
+    else if(recentAvg<olderAvg-5){trendLabel='↓ 下降中';trendBonus=-5;}
   }
 
-  document.getElementById('results').classList.add('visible');
+  const score=Math.min(100,Math.max(0,Math.round(avg*0.65+stabilityBonus+trendBonus+8)));
+  const grade=score>=80?'S — とても良好':score>=65?'A — 良好':score>=50?'B — 普通':score>=35?'C — 要注意':'D — 要改善';
+
+  document.getElementById('scName').textContent=partner.name;
+  document.getElementById('scScore').textContent=score;
+  document.getElementById('scGrade').textContent=grade;
+  document.getElementById('scAvg').textContent=avg+'°';
+  document.getElementById('scCount').textContent=hist.length+'回';
+  document.getElementById('scTrendVal').textContent=trendLabel;
+
+  let trendText=`平均${avg}°の関係。`;
+  if(variance<10)trendText+=' 感情の波が安定しています。';
+  else if(variance>20)trendText+=' 感情の波が大きめです。';
+  const fb=hist.filter(h=>h.feedback);
+  if(fb.length){const acc=fb.filter(h=>h.feedback.rating==='accurate').length;trendText+=` AI精度: ${Math.round(acc/fb.length*100)}%`;}
+  document.getElementById('scTrendText').textContent=trendText;
 }
 
-function setLoading(on, msg) {
-  document.getElementById('loading').classList.toggle('visible', on);
-  if (msg) document.getElementById('loadingMsg').textContent = msg;
-  document.getElementById('analyzeBtn').disabled = on;
-  document.getElementById('analyzeImageBtn').disabled = on;
+// ═══════════════════════════════
+// Save score card
+// ═══════════════════════════════
+async function saveScoreCard(){
+  const el=document.getElementById('scoreCard');
+  try{
+    const canvas=await html2canvas(el,{backgroundColor:null,scale:2});
+    const a=document.createElement('a');
+    a.download=`score-card-${Date.now()}.png`;
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+  }catch(e){alert('画像の保存に失敗しました: '+e.message);}
 }
 
-function showError(msg) {
-  const el = document.getElementById('errorBox');
-  el.textContent = msg;
-  el.classList.add('visible');
+// ═══════════════════════════════
+// Helpers
+// ═══════════════════════════════
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function initial(name){return name?name.charAt(0):'?';}
+function fmtBytes(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(1)+' MB';}
+function setLoading(on,msg){
+  document.getElementById('loading').classList.toggle('visible',on);
+  if(msg)document.getElementById('loadingMsg').textContent=msg;
+  document.getElementById('analyzeBtn').disabled=on;
+  document.getElementById('analyzeImageBtn').disabled=on;
 }
+function showError(msg){const e=document.getElementById('errorBox');e.textContent=msg;e.classList.add('visible');}
+function hideError(){document.getElementById('errorBox').classList.remove('visible');}
 
-function hideError() {
-  document.getElementById('errorBox').classList.remove('visible');
-}
+// ═══════════════════════════════
+// Init
+// ═══════════════════════════════
+renderPartners();
+renderHistory();
 </script>
 </body>
 </html>
