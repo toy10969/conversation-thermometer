@@ -10,6 +10,13 @@ const app = express();
 app.use(express.json({ limit: '20mb' }));
 app.use(express.static(join(__dirname, 'public')));
 
+const API_KEY = process.env.ANTHROPIC_API_KEY;
+if (!API_KEY) {
+  console.error('ERROR: ANTHROPIC_API_KEY environment variable is not set.');
+  process.exit(1);
+}
+const client = new Anthropic({ apiKey: API_KEY });
+
 function buildPrompt(conversation) {
   return `以下の会話を分析して、感情温度と詳細な感情分析をJSON形式で返してください。
 
@@ -54,11 +61,7 @@ emotionsは最も強い感情を3〜5個含めてください。
 }
 
 app.post('/api/analyze', async (req, res) => {
-  const { conversation, apiKey } = req.body;
-
-  if (!apiKey || typeof apiKey !== 'string' || apiKey.trim().length < 10) {
-    return res.status(400).json({ error: 'APIキーが無効です。' });
-  }
+  const { conversation } = req.body;
 
   if (!conversation || typeof conversation !== 'string') {
     return res.status(400).json({ error: '会話テキストが必要です。' });
@@ -73,8 +76,6 @@ app.post('/api/analyze', async (req, res) => {
   }
 
   try {
-    const client = new Anthropic({ apiKey: apiKey.trim() });
-
     const message = await client.messages.create({
       model: 'claude-opus-4-7',
       max_tokens: 1024,
@@ -116,11 +117,7 @@ app.post('/api/analyze', async (req, res) => {
 });
 
 app.post('/api/analyze-image', async (req, res) => {
-  const { imageData, mediaType, apiKey } = req.body;
-
-  if (!apiKey || typeof apiKey !== 'string' || apiKey.trim().length < 10) {
-    return res.status(400).json({ error: 'APIキーが無効です。' });
-  }
+  const { imageData, mediaType } = req.body;
 
   if (!imageData || typeof imageData !== 'string') {
     return res.status(400).json({ error: '画像データが必要です。' });
@@ -137,8 +134,6 @@ app.post('/api/analyze-image', async (req, res) => {
   }
 
   try {
-    const client = new Anthropic({ apiKey: apiKey.trim() });
-
     const message = await client.messages.create({
       model: 'claude-opus-4-7',
       max_tokens: 2048,

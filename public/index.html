@@ -66,26 +66,6 @@
     font-weight: 600;
   }
 
-  .api-key-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  input[type="password"], input[type="text"] {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 14px;
-    color: var(--text);
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  input:focus { border-color: var(--accent); }
-
   textarea {
     width: 100%;
     background: var(--surface);
@@ -443,16 +423,6 @@
   <h1>🌡️ 会話の温度計</h1>
   <p class="subtitle">テキスト貼り付けまたはスクリーンショットで、会話の感情温度を分析します</p>
 
-  <!-- API Key -->
-  <div class="card">
-    <h2>Anthropic API キー</h2>
-    <div class="api-key-row">
-      <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
-      <button class="btn btn-secondary" onclick="toggleApiKeyVisibility()">表示</button>
-    </div>
-    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">キーはブラウザのlocalStorageに保存され、このページからのみ使用されます。</p>
-  </div>
-
   <!-- Conversation Input -->
   <div class="card">
     <h2>会話の入力</h2>
@@ -614,18 +584,6 @@
 </div>
 
 <script>
-// --- API key persistence ---
-const apiKeyInput = document.getElementById('apiKey');
-const savedKey = localStorage.getItem('anthropic_api_key');
-if (savedKey) apiKeyInput.value = savedKey;
-apiKeyInput.addEventListener('input', () => {
-  localStorage.setItem('anthropic_api_key', apiKeyInput.value);
-});
-
-function toggleApiKeyVisibility() {
-  apiKeyInput.type = apiKeyInput.type === 'password' ? 'text' : 'password';
-}
-
 // --- Char count ---
 const convTextarea = document.getElementById('conversation');
 convTextarea.addEventListener('input', updateCharCount);
@@ -811,9 +769,6 @@ function animateEmotionBars(emotions) {
 
 // --- Main analyze ---
 async function analyze() {
-  const apiKey = apiKeyInput.value.trim();
-  if (!apiKey) { showError('APIキーを入力してください。'); return; }
-
   setLoading(true, currentTab === 'image' ? '画像を読み取り・分析中...' : '会話を分析中...');
   hideError();
   document.getElementById('results').classList.remove('visible');
@@ -829,7 +784,7 @@ async function analyze() {
       resp = await fetch('/api/analyze-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageData: uploadedImage.data, mediaType: uploadedImage.mediaType, apiKey }),
+        body: JSON.stringify({ imageData: uploadedImage.data, mediaType: uploadedImage.mediaType }),
       });
     } else {
       const conversation = convTextarea.value.trim();
@@ -841,7 +796,7 @@ async function analyze() {
       resp = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversation, apiKey }),
+        body: JSON.stringify({ conversation }),
       });
     }
 
