@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会話の温度計</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a18;
+    --card: #111128;
+    --surface: #191932;
+    --border: #2a2a4a;
+    --text: #e8e8f8;
+    --text-muted: #8888aa;
+    --accent: #6666ff;
+    --accent-hover: #7777ff;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    background: linear-gradient(135deg, #88aaff, #ff88cc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 28px;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .card h2 {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  .api-key-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  input[type="password"], input[type="text"] {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus { border-color: var(--accent); }
+
+  textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    color: var(--text);
+    font-size: 0.9rem;
+    outline: none;
+    resize: vertical;
+    min-height: 160px;
+    font-family: inherit;
+    line-height: 1.6;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--text-muted); }
+
+  .btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 22px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { background: var(--accent-hover); }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    padding: 8px 14px;
+  }
+
+  .btn-secondary:hover { color: var(--text); border-color: var(--accent); background: var(--surface); }
+
+  .textarea-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .char-count {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .action-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .hint { font-size: 0.75rem; color: var(--text-muted); }
+
+  /* Results layout */
+  .results {
+    display: none;
+    grid-template-columns: 220px 1fr;
+    gap: 20px;
+  }
+
+  .results.visible { display: grid; }
+
+  @media (max-width: 640px) {
+    .results.visible { grid-template-columns: 1fr; }
+  }
+
+  /* Thermometer */
+  .thermometer-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .temp-display {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .mood-label {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .zone-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  /* Right column */
+  .right-col { display: flex; flex-direction: column; gap: 16px; }
+
+  .summary-text {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .advice-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #aaffcc;
+    background: rgba(100, 255, 150, 0.05);
+    border-left: 3px solid #44cc77;
+    padding: 12px 14px;
+    border-radius: 0 8px 8px 0;
+  }
+
+  /* Emotion bars */
+  .emotion-bars { display: flex; flex-direction: column; gap: 10px; }
+
+  .emotion-row { display: flex; align-items: center; gap: 10px; }
+
+  .emotion-name {
+    width: 90px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .bar-bg {
+    flex: 1;
+    height: 10px;
+    background: var(--surface);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    width: 0%;
+    transition: width 0.8s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+
+  .bar-val {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    width: 30px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Points */
+  .points-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  @media (max-width: 480px) {
+    .points-grid { grid-template-columns: 1fr; }
+  }
+
+  .points-section h3 {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .points-section.positive h3 { color: #66ddaa; }
+  .points-section.concern h3 { color: #ffaa66; }
+
+  .point-item {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+
+  .positive .point-item { background: rgba(100, 220, 160, 0.08); color: #99eebb; }
+  .concern .point-item { background: rgba(255, 160, 80, 0.08); color: #ffcc99; }
+
+  /* Loading */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+  }
+
+  .loading.visible { display: block; }
+
+  .spinner {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error */
+  .error-box {
+    display: none;
+    background: rgba(255, 80, 80, 0.1);
+    border: 1px solid rgba(255, 80, 80, 0.3);
+    border-radius: 10px;
+    padding: 14px 16px;
+    color: #ff9999;
+    font-size: 0.9rem;
+  }
+
+  .error-box.visible { display: block; }
+
+  /* Tabs */
+  .input-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 16px;
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 4px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    border-radius: 7px;
+    padding: 9px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Image upload zone */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 44px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(102, 102, 255, 0.05);
+  }
+
+  .upload-zone-icon { font-size: 2.5rem; margin-bottom: 10px; }
+  .upload-zone p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 4px; }
+  .upload-hint { font-size: 0.75rem; color: #555577; }
+
+  #fileInput { display: none; }
+
+  /* Image preview */
+  .image-preview {
+    display: none;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 14px;
+    background: var(--surface);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+
+  .image-preview.visible { display: flex; }
+
+  .preview-thumb {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+
+  .preview-info { flex: 1; min-width: 0; }
+
+  .preview-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
+
+  .preview-size { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; }
+
+  .preview-remove {
+    background: rgba(255, 80, 80, 0.12);
+    border: 1px solid rgba(255, 80, 80, 0.3);
+    color: #ff8888;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .preview-remove:hover { background: rgba(255, 80, 80, 0.25); }
+
+  /* Extracted text */
+  .extracted-text {
+    font-size: 0.82rem;
+    line-height: 1.75;
+    color: var(--text-muted);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 12px 14px;
+    max-height: 220px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-family: inherit;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🌡️ 会話の温度計</h1>
+  <p class="subtitle">テキスト貼り付けまたはスクリーンショットで、会話の感情温度を分析します</p>
+
+  <!-- API Key -->
+  <div class="card">
+    <h2>Anthropic API キー</h2>
+    <div class="api-key-row">
+      <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
+      <button class="btn btn-secondary" onclick="toggleApiKeyVisibility()">表示</button>
+    </div>
+    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">キーはブラウザのlocalStorageに保存され、このページからのみ使用されます。</p>
+  </div>
+
+  <!-- Conversation Input -->
+  <div class="card">
+    <h2>会話の入力</h2>
+    <!-- Tabs -->
+    <div class="input-tabs">
+      <button class="tab-btn active" id="tabText" onclick="switchTab('text')">📝 テキスト入力</button>
+      <button class="tab-btn" id="tabImage" onclick="switchTab('image')">📷 画像アップロード</button>
+    </div>
+    <!-- Text panel -->
+    <div class="tab-panel active" id="panelText">
+      <textarea id="conversation" placeholder="LINEやメールの会話をここに貼り付けてください...
+
+例:
+田中: おはよう！今日のランチどうする？
+鈴木: カフェ行こうよ！新しいお店できたんだって
+田中: いいね！何時にしよっか
+鈴木: 12時でどう？
+田中: ばっちり👍"></textarea>
+      <div class="textarea-footer">
+        <span class="char-count" id="charCount">0 / 20000 文字</span>
+        <div class="action-row">
+          <button class="btn btn-secondary" onclick="loadSample()">サンプルを読み込む</button>
+          <button class="btn" id="analyzeBtn" onclick="analyze()">🔍 分析する</button>
+          <span class="hint">Ctrl+Enter</span>
+        </div>
+      </div>
+    </div>
+    <!-- Image panel -->
+    <div class="tab-panel" id="panelImage">
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp">
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-zone-icon">📷</div>
+        <p>クリックまたはドラッグ&amp;ドロップで画像をアップロード</p>
+        <p class="upload-hint">LINEトーク画面のスクリーンショット（JPEG・PNG・GIF・WebP、最大10MB）</p>
+      </div>
+      <div class="image-preview" id="imagePreview">
+        <img class="preview-thumb" id="previewThumb" src="" alt="preview">
+        <div class="preview-info">
+          <div class="preview-name" id="previewName"></div>
+          <div class="preview-size" id="previewSize"></div>
+          <button class="preview-remove" onclick="clearImage()">× 削除</button>
+        </div>
+      </div>
+      <div class="textarea-footer">
+        <span class="char-count" id="imageSizeLabel"></span>
+        <div class="action-row">
+          <button class="btn" id="analyzeImageBtn" onclick="analyze()">🔍 画像を分析する</button>
+          <span class="hint">Ctrl+Enter</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p id="loadingMsg">分析中...</p>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+    <!-- Thermometer -->
+    <div class="thermometer-card">
+      <div class="temp-display" id="tempDisplay">--</div>
+      <div class="mood-label" id="moodLabel">--</div>
+
+      <svg viewBox="0 0 110 310" width="110" height="310" id="thermometerSvg">
+        <defs>
+          <clipPath id="tubeClip">
+            <rect x="36" y="16" width="28" height="213" rx="12"/>
+          </clipPath>
+          <!-- Tube gradient overlay for glass effect -->
+          <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="white" stop-opacity="0.12"/>
+            <stop offset="0.3" stop-color="white" stop-opacity="0.04"/>
+            <stop offset="1" stop-color="black" stop-opacity="0.1"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Tube outline -->
+        <rect x="35" y="15" width="30" height="215" rx="15" fill="#1a1a35" stroke="#3a3a60" stroke-width="1.5"/>
+
+        <!-- Fill rect (animated) -->
+        <rect id="thermFill" x="36" y="229" width="28" height="0" rx="10" clip-path="url(#tubeClip)" fill="#4466ff"/>
+
+        <!-- Glass overlay -->
+        <rect x="36" y="16" width="28" height="213" rx="12" fill="url(#glassGrad)" clip-path="url(#tubeClip)"/>
+
+        <!-- Tick marks & labels -->
+        <line x1="65" y1="16" x2="72" y2="16" stroke="#4a4a70" stroke-width="1.5"/>
+        <text x="76" y="20" font-size="10" fill="#6666aa" font-family="monospace">100</text>
+
+        <line x1="65" y1="69" x2="70" y2="69" stroke="#4a4a70" stroke-width="1"/>
+        <text x="74" y="73" font-size="10" fill="#6666aa" font-family="monospace">75</text>
+
+        <line x1="65" y1="123" x2="72" y2="123" stroke="#4a4a70" stroke-width="1.5"/>
+        <text x="76" y="127" font-size="10" fill="#6666aa" font-family="monospace">50</text>
+
+        <line x1="65" y1="176" x2="70" y2="176" stroke="#4a4a70" stroke-width="1"/>
+        <text x="74" y="180" font-size="10" fill="#6666aa" font-family="monospace">25</text>
+
+        <line x1="65" y1="229" x2="72" y2="229" stroke="#4a4a70" stroke-width="1.5"/>
+        <text x="76" y="233" font-size="10" fill="#6666aa" font-family="monospace">0</text>
+
+        <!-- Bulb -->
+        <circle cx="50" cy="257" r="28" fill="#1a1a35" stroke="#3a3a60" stroke-width="1.5"/>
+        <circle id="bulbFill" cx="50" cy="257" r="26" fill="#4466ff"/>
+        <circle cx="50" cy="257" r="26" fill="url(#glassGrad)"/>
+      </svg>
+
+      <div class="zone-label" id="zoneLabel"></div>
+    </div>
+
+    <!-- Right column -->
+    <div class="right-col">
+      <!-- Extracted text (image mode only) -->
+      <div class="card" id="extractedCard" style="display:none">
+        <h2>📷 読み取られた会話テキスト</h2>
+        <pre class="extracted-text" id="extractedText"></pre>
+      </div>
+
+      <!-- Summary -->
+      <div class="card">
+        <h2>感情分析</h2>
+        <p class="summary-text" id="summaryText"></p>
+      </div>
+
+      <!-- Emotions -->
+      <div class="card">
+        <h2>感情の内訳</h2>
+        <div class="emotion-bars" id="emotionBars"></div>
+      </div>
+
+      <!-- Points -->
+      <div class="card">
+        <h2>詳細ポイント</h2>
+        <div class="points-grid">
+          <div class="points-section positive">
+            <h3>✓ 良い点</h3>
+            <div id="positivePoints"></div>
+          </div>
+          <div class="points-section concern">
+            <h3>⚠ 懸念点</h3>
+            <div id="concernPoints"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advice -->
+      <div class="card">
+        <h2>アドバイス</h2>
+        <p class="advice-text" id="adviceText"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- API key persistence ---
+const apiKeyInput = document.getElementById('apiKey');
+const savedKey = localStorage.getItem('anthropic_api_key');
+if (savedKey) apiKeyInput.value = savedKey;
+apiKeyInput.addEventListener('input', () => {
+  localStorage.setItem('anthropic_api_key', apiKeyInput.value);
+});
+
+function toggleApiKeyVisibility() {
+  apiKeyInput.type = apiKeyInput.type === 'password' ? 'text' : 'password';
+}
+
+// --- Char count ---
+const convTextarea = document.getElementById('conversation');
+convTextarea.addEventListener('input', updateCharCount);
+function updateCharCount() {
+  const len = convTextarea.value.length;
+  const el = document.getElementById('charCount');
+  el.textContent = `${len.toLocaleString()} / 20,000 文字`;
+  el.style.color = len > 18000 ? '#ff8866' : 'var(--text-muted)';
+}
+
+// --- Tab state ---
+let currentTab = 'text';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tabText').classList.toggle('active', tab === 'text');
+  document.getElementById('tabImage').classList.toggle('active', tab === 'image');
+  document.getElementById('panelText').classList.toggle('active', tab === 'text');
+  document.getElementById('panelImage').classList.toggle('active', tab === 'image');
+  hideError();
+}
+
+// --- Image upload state ---
+let uploadedImage = null;
+
+const fileInput = document.getElementById('fileInput');
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+const uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+function handleFile(file) {
+  const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (!validTypes.includes(file.type)) {
+    showError('対応形式はJPEG、PNG、GIF、WebPのみです。');
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    showError('ファイルサイズは10MB以下にしてください。');
+    return;
+  }
+  hideError();
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    const base64 = dataUrl.split(',')[1];
+    uploadedImage = { data: base64, mediaType: file.type, name: file.name, size: file.size };
+
+    document.getElementById('previewThumb').src = dataUrl;
+    document.getElementById('previewName').textContent = file.name;
+    document.getElementById('previewSize').textContent = formatBytes(file.size);
+    document.getElementById('imageSizeLabel').textContent = formatBytes(file.size);
+    uploadZone.style.display = 'none';
+    document.getElementById('imagePreview').classList.add('visible');
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearImage() {
+  uploadedImage = null;
+  fileInput.value = '';
+  uploadZone.style.display = '';
+  document.getElementById('imagePreview').classList.remove('visible');
+  document.getElementById('imageSizeLabel').textContent = '';
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// --- Keyboard shortcut ---
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'Enter') analyze();
+});
+
+// --- Sample text ---
+function loadSample() {
+  convTextarea.value = `田中: ねえ、昨日のミーティングどうだった？
+鈴木: うーん、正直ちょっと疲れたかな。長かったし
+田中: だよね。でも山田さんのプレゼン面白かったじゃん！
+鈴木: あーあれは良かった！アイデアが斬新で
+田中: そうそう！私もあの部分すごく刺激受けた
+鈴木: 次回は自分も何か提案してみようかな
+田中: いいじゃん！一緒に考えようよ
+鈴木: ありがとう、心強い！週末に少し考えてみる
+田中: 楽しみにしてるよ😊
+鈴木: ふふ、プレッシャーかけないでよ笑`;
+  updateCharCount();
+}
+
+// --- Color helpers ---
+function tempColor(t) {
+  const stops = [
+    [0,   [30,  80,  220]],
+    [15,  [60,  170, 240]],
+    [35,  [80,  220, 200]],
+    [50,  [200, 220, 80]],
+    [65,  [240, 170, 40]],
+    [80,  [240, 90,  40]],
+    [100, [200, 20,  20]],
+  ];
+  for (let i = 0; i < stops.length - 1; i++) {
+    const [t0, c0] = stops[i];
+    const [t1, c1] = stops[i + 1];
+    if (t <= t1) {
+      const f = (t - t0) / (t1 - t0);
+      return `rgb(${Math.round(c0[0]+(c1[0]-c0[0])*f)},${Math.round(c0[1]+(c1[1]-c0[1])*f)},${Math.round(c0[2]+(c1[2]-c0[2])*f)})`;
+    }
+  }
+  return 'rgb(200,20,20)';
+}
+
+function zoneLabel(t) {
+  if (t <= 15)  return '❄️ 極寒 — 非常に冷たい雰囲気';
+  if (t <= 30)  return '🧊 冷たい — 距離感がある';
+  if (t <= 45)  return '😐 やや冷たい — 少し硬い';
+  if (t <= 55)  return '🌤 中立 — 普通の雰囲気';
+  if (t <= 70)  return '😊 温かい — 良い関係';
+  if (t <= 85)  return '🌟 とても温かい — 活発で良好';
+  return              '🔥 とても熱い — 情熱的・活気';
+}
+
+// --- Animation ---
+const emotionHues = [210, 150, 40, 280, 0, 180, 320];
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+let animFrame = null;
+function animateThermometer(targetTemp) {
+  if (animFrame) cancelAnimationFrame(animFrame);
+  const fill = document.getElementById('thermFill');
+  const bulb = document.getElementById('bulbFill');
+  const tempDisplay = document.getElementById('tempDisplay');
+  const start = performance.now();
+  const duration = 1200;
+
+  function step(now) {
+    const rawT = Math.min((now - start) / duration, 1);
+    const t = easeOut(rawT);
+    const cur = Math.round(targetTemp * t);
+    const color = tempColor(cur);
+
+    const maxH = 213;
+    const fillH = (cur / 100) * maxH;
+    const fillY = 229 - fillH;
+    fill.setAttribute('height', fillH);
+    fill.setAttribute('y', fillY);
+    fill.setAttribute('fill', color);
+    bulb.setAttribute('fill', color);
+
+    tempDisplay.textContent = cur + '°';
+    tempDisplay.style.color = color;
+
+    if (rawT < 1) animFrame = requestAnimationFrame(step);
+  }
+
+  animFrame = requestAnimationFrame(step);
+}
+
+function animateEmotionBars(emotions) {
+  emotions.forEach((em, i) => {
+    const hue = emotionHues[i % emotionHues.length];
+    const bar = document.getElementById(`bar-${i}`);
+    if (bar) {
+      setTimeout(() => {
+        bar.style.width = em.intensity + '%';
+        bar.style.background = `hsl(${hue}, 70%, 55%)`;
+      }, 200 + i * 80);
+    }
+  });
+}
+
+// --- Main analyze ---
+async function analyze() {
+  const apiKey = apiKeyInput.value.trim();
+  if (!apiKey) { showError('APIキーを入力してください。'); return; }
+
+  setLoading(true, currentTab === 'image' ? '画像を読み取り・分析中...' : '会話を分析中...');
+  hideError();
+  document.getElementById('results').classList.remove('visible');
+
+  try {
+    let resp;
+    if (currentTab === 'image') {
+      if (!uploadedImage) {
+        showError('画像をアップロードしてください。');
+        setLoading(false);
+        return;
+      }
+      resp = await fetch('/api/analyze-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageData: uploadedImage.data, mediaType: uploadedImage.mediaType, apiKey }),
+      });
+    } else {
+      const conversation = convTextarea.value.trim();
+      if (!conversation) {
+        showError('会話テキストを入力してください。');
+        setLoading(false);
+        return;
+      }
+      resp = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversation, apiKey }),
+      });
+    }
+
+    const data = await resp.json();
+    if (!resp.ok) { showError(data.error || 'エラーが発生しました。'); return; }
+
+    renderResults(data, currentTab === 'image');
+  } catch (err) {
+    showError('通信エラー: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function renderResults(data, showExtracted) {
+  animateThermometer(data.temperature);
+  document.getElementById('moodLabel').textContent = data.mood || '';
+  document.getElementById('zoneLabel').textContent = zoneLabel(data.temperature);
+
+  document.getElementById('summaryText').textContent = data.summary || '';
+  document.getElementById('adviceText').textContent = data.advice || '';
+
+  const barsEl = document.getElementById('emotionBars');
+  barsEl.innerHTML = (data.emotions || []).map((em, i) => `
+    <div class="emotion-row">
+      <div class="emotion-name">${em.emoji || ''} ${em.name || ''}</div>
+      <div class="bar-bg"><div class="bar-fill" id="bar-${i}"></div></div>
+      <div class="bar-val">${em.intensity}</div>
+    </div>
+  `).join('');
+  animateEmotionBars(data.emotions || []);
+
+  const pos = document.getElementById('positivePoints');
+  const con = document.getElementById('concernPoints');
+  pos.innerHTML = (data.positive_points || []).map(p => `<div class="point-item">${p}</div>`).join('');
+  con.innerHTML = (data.concern_points || []).map(p => `<div class="point-item">${p}</div>`).join('');
+
+  const extractedCard = document.getElementById('extractedCard');
+  if (showExtracted && data.extracted_text) {
+    document.getElementById('extractedText').textContent = data.extracted_text;
+    extractedCard.style.display = '';
+  } else {
+    extractedCard.style.display = 'none';
+  }
+
+  document.getElementById('results').classList.add('visible');
+}
+
+function setLoading(on, msg) {
+  document.getElementById('loading').classList.toggle('visible', on);
+  if (msg) document.getElementById('loadingMsg').textContent = msg;
+  document.getElementById('analyzeBtn').disabled = on;
+  document.getElementById('analyzeImageBtn').disabled = on;
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorBox');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+function hideError() {
+  document.getElementById('errorBox').classList.remove('visible');
+}
+</script>
+</body>
+</html>

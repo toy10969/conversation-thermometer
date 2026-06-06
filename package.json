@@ -1,0 +1,15 @@
+{
+  "name": "conversation-thermometer",
+  "version": "1.0.0",
+  "description": "会話の感情温度を分析するWebアプリ",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "express": "^4.18.2"
+  }
+}
